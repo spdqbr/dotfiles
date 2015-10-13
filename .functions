@@ -1,0 +1,432 @@
+#!/bin/bash
+
+# swap directory
+# useful for changing from /nmount/server1/Application/logs
+#                      to  /nmount/server2/Application/logs
+# by use of "sd server1 server2"
+function sd(){
+ cd ${PWD/\/$1\//\/$2\/}
+}
+
+# frequent directory, used to alias directories
+# stores aliases in ~/.fd
+fd() { 
+    # Get the fd alias from the front of the string
+    local fdshort=${1%%/*}
+
+    # Find the expansion
+    local equivalent=$( egrep "^$fdshort " ~/.fd | sed -e 's/^[^ ]* //g' -e 's/ /\\ /g' )
+
+    if [[ "$equivalent" != "" ]]
+    then
+        # cd to the full directory
+        cd "${1/$fdshort/$equivalent}"
+    else
+        # alias not found, print aliases
+        echo ""
+        cat ~/.fd
+        echo ""
+    fi; 
+       
+}
+
+# adds the current working directory to your fd alias list
+addfd(){ echo "$1" "`pwd`" >> ~/.fd; }
+
+# autocomplete for fd
+_fd_complete() {
+    # Extract the word fragment we're trying to complete
+    local word=${COMP_WORDS[COMP_CWORD]}
+
+    # Check for path separators
+    local slashCount=$( grep -o "/" <<< "$word" | wc -l )
+    if [[ $slashCount -gt 0 ]]
+    then
+        # Tell complete to only display the last part of the match
+        # e.g. if the match is /temp/foo/bar, only display bar
+        _compopt_o_filenames
+
+        # Extract the fd alias
+        fdshort=${word%%/*}
+        
+        # Find its expansion
+        fd=$( egrep "^${fdshort} " ~/.fd | sed -e 's/^[^ ]* //g' -e 's/ /\\ /g' )
+        
+        # if the path is more than one level deep, split out the intermediates
+        # e.g. if the command line is fd tmp/foo/bar/blah
+        # "path" becomes foo/bar
+        local path=
+        if [[ $slashCount -gt 1 ]]
+        then
+            # trim the fd alias from the beginning 
+            path=${word#*/}
+
+            # trim the incomplete word from the end
+            path=${path%/*}
+            
+            # Combine everything except the incomplete word
+            fdshort=${fdshort}/${path}
+        fi
+
+        # Get the incomplete word
+        local partialword=${word##*/}
+
+        # Generate a list of directories matching the incomplete word in the expanded path
+        local list=$( cd ${fd}/${path}; compgen -d )
+        COMPREPLY=($(compgen -W '${list[@]}' -- "$partialword"))
+
+        # add the full fd path to the compreply so it doesn't overwrite the commandline
+        temp=()
+        for reply in ${COMPREPLY[@]}
+        do
+           temp+=("${fdshort}/${reply}")
+        done
+        COMPREPLY=(${temp[@]}) 
+    else
+        # If there are no slashes, just source the ~/.fd file
+        local list=$(sed -e 's/ .*//g' ~/.fd)
+        COMPREPLY=($(compgen -W '${list[@]}' -- "$word"))
+    fi  
+
+    # Append the slash if there's only one match
+    if [[ ${#COMPREPLY[@]} -eq 1 ]];
+    then
+        i=${COMPREPLY[0]};
+        COMPREPLY[0]="${i}/";
+    fi;
+
+    return 0
+}
+
+complete -o nospace -F _fd_complete fd
+
+# find file
+# searches all subdirectories of . for a file (not directory)
+# containing the given substring (case insensitive)
+ff() { find . -type f -iname '*'$*'*' ; }
+
+# Swap 2 filenames around, if they exist
+swap()
+{
+    local TMPFILE=tmp.$$ 
+
+    [ $# -ne 2 ] && echo "swap: 2 arguments needed" && return 1
+    [ ! -e $1 ] && echo "swap: $1 does not exist" && return 1
+    [ ! -e $2 ] && echo "swap: $2 does not exist" && return 1
+
+    mv "$1" $TMPFILE 
+    mv "$2" "$1"
+    mv $TMPFILE "$2"
+}
+
+# more thorough evrsion of which, checks aliases and functions
+function which {
+    (alias; declare -f) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+}
+
+# Pretty print xml
+formatxml(){
+    if [[ $# -eq 0 ]]
+    then
+        xmlData=`zenity --entry --text="Paste XML Data"`
+        echo $xmlData | xmllint --format -
+    else
+        xmllint --format $* 2> /dev/null
+    fi
+}
+
+# Pattern-move, move/rename files using regex replacement
+# -d for dry-run
+pmv(){
+    if [[ $# -lt 3 ]]
+        then
+        echo "Usage: $0 [-d] \"pattern\" \"replacement\" file1 [file2 [file3 [ ... ]]]"
+        echo "-d for dry run"
+        return
+    fi
+
+    dryRun=false
+
+    pattern=$1
+    shift
+
+    if [[ "$pattern" == "-d" ]]
+    then
+        dryRun=true
+        pattern=$1
+        shift
+    fi
+
+    replacement=$1
+    shift
+
+    if [[ "$dryRun" == true ]]
+    then
+        echo "*****Dry run*****"
+    fi
+
+    echo "$pattern -> $replacement"
+
+    while [[ $# -gt 0 ]]
+    do
+        newName=`echo "$1" | sed -e "s/$pattern/$replacement/g"`
+        if [[ "$newName" != "$1" ]]
+        then
+            echo "mv \"$1\" \"$newName\""
+            
+            if [[ "$dryRun" == false ]]
+            then    
+                mv "$1" "$newName"
+            fi
+        fi
+        shift
+    done
+}
+
+# Quickly test how bash handles lists of args
+argsTest ()
+{
+    echo "$# parameters";
+    echo Using '$*';
+    for p in $*;
+    do
+        echo "[$p]";
+    done;
+    echo Using '"$*"';
+    for p in "$*";
+    do
+        echo "[$p]";
+    done;
+    echo Using '$@';
+    for p in $@;
+    do
+        echo "[$p]";
+    done;
+    echo Using '"$@"';
+    for p in "$@";
+    do
+        echo "[$p]";
+    done
+}
+
+# Normalize yes/no response
+yesno() {
+    question=$1
+    default=$2
+    echo -n $question
+    read yn
+
+    if [[ "$yn" == "" ]]
+    then
+        yn=$default
+    fi
+
+    yn=`echo $yn | tr '[:lower:]' '[:upper:]'`
+    if [[ "$yn" == "Y" || "$yn" == "YES" || "$yn" == "T" || "$yn" == "TRUE" || "$yn" == "UH-HUH" || "$yn" == "YUP" || "$yn" == "AFFIRMATIVE" ]]
+    then
+            return 0
+    else
+            return 1
+    fi
+}
+
+# Get current screen geometry using xtermcontrol
+getGeom() {
+    current=`xtermcontrol --get-geometry`
+
+    export curW=`echo $current | sed -e 's/x.*//g'`
+    export curH=`echo $current | sed -e 's/.*x\([^+]*\)+.*/\1/g'`
+    export curX=`echo $current | sed -e 's/[^+]*+\(.*\)+.*/\1/g'`
+    export curY=`echo $current | sed -e 's/.*+//g'`
+}
+
+# Shrink terminal screen to half it's height moving it "half up"
+hu() {
+    getGeom;
+    xtermcontrol --geometry=${curW}x$(( curH / 2 ))+${curX}+${curY}
+}
+
+# Expand terminal screen to twice its height, moving it "Double down"
+dd() {
+    getGeom;
+    xtermcontrol --geometry=${curW}x$(( curH * 2))+${curX}+${curY}
+}
+
+# Moves files with a given search string to the given folder
+# Example: sortByString Exception Exception_dir *.log
+#  Would move all log files containing the word "Exception" to the Exception_dir folder
+sortByString() {
+    searchString=$1
+    shift
+
+    dirName=$1
+    shift
+
+    echo "Moving files with string \"$searchString\" to $dirName"
+
+    if [[ ! -d $dirName ]]
+    then
+        mkdir $dirName
+    fi
+
+    for file in $(grep -l "$searchString" $*)
+    do
+        echo $file
+        mv "$file" "$dirName/$file"
+    done
+}
+
+# Look In Zip (and jar) files for a file containing the search string
+liz() {
+    find . -type f \( -iname \*.jar -o -iname \*.zip \) -print | \
+    while read filename
+    do 
+        values=`jar -ft "$filename" | egrep "$1"`
+        if [[ $? -eq 0 ]]
+        then
+            echo $filename
+            for value in $values
+            do
+                echo "    $value"
+            done
+            echo ""
+        fi
+    done
+}
+
+# Resize terminal to rows x columns
+resize(){
+    printf "\e[8;$1;$2;t"
+}
+
+# Find all differences between two folders
+# Output a copy-paste friendly diff command for differing files
+foldiff() {
+    diff --recursive --brief "$1" "$2" | sed -e "s/^Files/windiff/g" -e "s/ and / /g" -e "s/ differ$//g"
+}
+
+# cd up to a folder higher in the path
+# For example, if you're in /var/logs/foo/bar/baz you can run
+# cdup logs
+# to switch to /var/logs
+function cdup {
+    newdir="${PWD/\/$1\/*/}/$1"
+    if [[ -d "$newdir" ]]
+    then
+        cd "$newdir"
+    else
+        echo "\"$newdir\" does not exist"
+    fi
+}
+
+function _cdup_complete {
+    local word=${COMP_WORDS[COMP_CWORD]}
+    local list=$(pwd | cut -c 2- | sed -e 's#/[^/]*$##g' -e 's/\([ ()]\)/\\\\\1/g')
+    IFS=/
+    list=$(compgen -W "$list" -- "$word")
+    IFS=$'\n'
+    COMPREPLY=($list)
+    return 0
+}
+
+complete -F _cdup_complete cdup
+
+function sudo {
+    cmd /K "runas /user:dhayes.pc@ECHOSTAR \"$@\" "
+}
+
+# resolve dependencies for gem
+function resolve_gem_dependencies {
+    tempfile=/tmp/gemlist.txt
+
+    gem list > $tempfile
+
+    grep '^gem' "$@" | \
+    sed -e 's/gem "\([^"]*\)", "= \([^"]*\)"/\1:\2/g' | \
+    while read line
+    do 
+        version=${line/#*:/}
+        gem=${line/%:*/}
+        grep -q "$gem (.*$version.*)" $tempfile> /dev/null
+        if [[ $? -ne 0 ]]
+        then 
+            command="gem install $gem -v $version"
+            echo $command
+            $command
+        fi
+    done
+
+}
+
+# Auto search the bash man page for a command
+function bashman { 
+    man bash | /usr/bin/less -p "^       $1 "; 
+}
+
+# Backup/restore a file by adding or removing the .bak exension
+function bak {
+    local force=1
+    local cmd=mv
+    local OPTIND=0
+
+    while getopts :fmc FLAG
+    do
+        echo $FLAG
+        case $FLAG in
+        f) force=0
+           ;;
+        m) cmd=mv
+           ;;
+        c) cmd=cp
+           ;;
+        esac
+    done
+
+    shift $((OPTIND-1))
+
+    for var in "$@"
+    do
+        if [[ -f "$var" ]]
+        then
+            if [[ "$var" == *.bak ]]
+            then
+                doMove=0
+                if [[ $force -eq 1 && -f ${var%.bak} ]]
+                then
+                    yesno "${var%.bak} exists. Overwrite [yN]? " "n"
+                    doMove=$?
+                fi
+                if [[ ${doMove} -eq 0 ]]
+                then
+                    echo "Restoring $var to ${var%.bak}..."
+                    $cmd "$var" "${var%.bak}"
+                else
+                    echo "Skipping restore of $var"
+                fi
+            else
+                doMove=0
+                if [[ $force -eq 1 && -f "${var}.bak" ]]
+                then
+                    yesno "${var}.bak exists. Overwrite [yN]? " "n"
+                    doMove=$?
+                fi
+                if [[ ${doMove} -eq 0 ]]
+                then
+                    echo "Backing up $var to ${var}.bak..."
+                    $cmd "$var" "${var}.bak"
+                else
+                    echo "Skipping backup of $var"
+                fi
+            fi
+        else
+            echo "File not found: $var"
+        fi 
+    done
+}
+
+function sanitize {
+    while read arg
+    do
+        echo "$arg" | sed -e 's/\([ *?&]\)/\\\1/g'
+    done
+}

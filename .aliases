@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# If sshrc is available, use it
+if [[ -f ~/dotfiles/sshrc ]]
+then
+    alias ssh='~/dotfiles/sshrc'
+fi
+
+# Colorize grep
+alias egrep='egrep --color=auto'
+alias grep='grep --color=auto'
+
+# Colorize ls
+alias ls='ls -CFh --color=auto --show-control-chars'
+
+# ls shortcuts
+alias ll='ls -l'
+alias lla='ll -a'
+alias lsd='ll | egrep "^d"'              # List directories only
+alias lsf='ll | egrep "^[^d]"'           # List files only
+alias ltr='ll -tr'                       # List in time-reverse order
+alias lsi='ls -l | sort -k1.1,1.1r -k9f' # Case insensitive list
+
+# cd up shortcuts
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+# Pretty print path and classpath
+alias path='echo -e ${PATH//:/\\n}'
+alias classpath='echo $CLASSPATH | sed -e "s/[:;]/\n/g"'
+
+# Alawys use human readable sizes
+alias df='df -kTh'
+alias du='du -kh'
+
+# If vim is available, use vim 
+if which vim &> /dev/null
+then
+    alias vi="$( which vim )"
+fi
+
+# Launch xterm with preferred settings
+alias xterm='xterm -display 127.0.0.1:0.0 -ls -fg green -bg black -fn 9x15 -sb'
+
+# Line numbers, no wrap, case-insenitive search
+alias less='less -SINr' 
+
+# Edit hosts file
+alias hosts='vi /etc/hosts'
+
+# Repeat last command until it returns success
+alias waitfor='while [[ $? -ne 0 ]]; do `fc -ln -1`; done'
+
+# Look for files containing the search string recursively in pwd
+alias findstr='find . -type f ! -path "*/.svn/*" -print0 | xargs -0 egrep'
+
+# md5sum pwd
+alias md5='find . -type f -print0 | xargs -0 md5sum | tee "${PWD/*\//}.md5"'
+
+# Check if files have changed by using md5sum
+alias md5check='md5sum -c "${PWD/*\//}.md5" | egrep -v ": OK$"'
+
+# Move xterm around
+alias mright='xtermcontrol --geometry=139x59+1284+58'
+alias mleft='xtermcontrol --geometry=139x65+4+30'
+alias lm='xtermcontrol --geometry=139x46+4+60'
+
+# Recursively download entire web page and dependencies (Careful!)
+alias ripsite='wget --recursive --no-clobber --page-requisites --html-extension --convert-links --restrict-file-names=windows --domains website.org --no-parent'
+
+# Grep for weird characters
+alias grepnonascii='grep -P -n "[\x80-\xFF]"'
+
+# Strip color codes from output
+alias decolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
+
+# explanation of below:
+# 1. create register 'a' (:a)
+# 2. put this line and the next into the buffer (N)
+# 3. if it's not the last line ($!) branch back to a (ba)
+# 4. replace the new lines
+# Obsolete, but kept here as sed example
+#alias striplines='sed -e ":a;N;\$!ba;s/\n//g"'
+#alias striplinesmark='sed -e ":a;N;\$!ba;s/\n/ NEWLINE /g"'
+
+# Above replaced with simpler/faster awk equivalents
+alias striplines="awk '{ printf \"%s\", \$0 }'"
+alias striplinesmark="awk '{ printf \"%s::NEWLINE::\", \$0 }'"
+
+# creates  a tree representation of the current directory structure
+alias dirf='find . -type d | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+
+# creates  a tree representation of the current directory structure with files shown
+alias filef='find . | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+
+# Shares the current directory on http://<machine_name>:8000 
+alias webshare='python -m SimpleHTTPServer 8001'
+
+# Sync two folders
+alias sync='rsync --recursive --times --delete-during --stats --human-readable -h --progress'
+
+# order files in this and all subdirectories by date modified (useful with | head -# or | tail -# )
+alias recentmod='find . -type f -printf "%TY-%Tm-%Td %TT %p\n" | sort -r'
