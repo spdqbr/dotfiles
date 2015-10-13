@@ -15,7 +15,7 @@ fd() {
     local fdshort=${1%%/*}
 
     # Find the expansion
-    local equivalent=$( egrep "^$fdshort " ~/.fd | sed -e 's/^[^ ]* //g' -e 's/ /\\ /g' )
+    local equivalent=$( egrep "^$fdshort " ~/.fd | sed -e 's/^[^ ]* //g')
 
     if [[ "$equivalent" != "" ]]
     then
@@ -31,7 +31,7 @@ fd() {
 }
 
 # adds the current working directory to your fd alias list
-addfd(){ echo "$1" "`pwd`" >> ~/.fd; }
+addfd(){ echo "$1" "$(pwd)" >> ~/.fd; }
 
 # autocomplete for fd
 _fd_complete() {
@@ -424,9 +424,38 @@ function bak {
     done
 }
 
+# Sanitize file names/paths for pasting into terminal
 function sanitize {
     while read arg
     do
-        echo "$arg" | sed -e 's/\([ *?&]\)/\\\1/g'
+        echo "$arg" | sed -e 's/\([-*? ()]\)/\\\1/g'
     done
 }
+
+# popup window when command is complete
+# If no command is given, re-execute the last command and alert
+alert() {
+    if [[ $# -eq 0 ]]
+    then
+        command=$(fc -ln -1)
+    else
+        command="$*"
+    fi
+
+    $command
+
+    returnCode=$?
+
+    if [[ $returnCode -eq 0 ]]
+    then
+        zenity --info --text="Command \n\
+    $command \n\
+    Completeded successfully"
+
+    else
+        zenity --error --text="Command \n\
+    $command \n\
+    Failed! Exit code $returnCode"
+    fi
+}
+

@@ -4,6 +4,8 @@
 alias jq='/cygdrive/c/apps/jq-1.4/jq.exe'
 alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
 alias explorer='explorer .,/e'
+export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
+alias zenity='/cygdrive/c/Program\ Files\ \(x86\)/zenity/bin/zenity.exe'
 
 jd() {
     /cygdrive/c/Apps/jd-gui/jd-gui.exe $* &
