@@ -331,10 +331,6 @@ function _cdup_complete {
 
 complete -F _cdup_complete cdup
 
-function sudo {
-    cmd /K "runas /user:dhayes.pc@ECHOSTAR \"$@\" "
-}
-
 # resolve dependencies for gem
 function resolve_gem_dependencies {
     tempfile=/tmp/gemlist.txt
@@ -434,7 +430,7 @@ function sanitize {
 
 # popup window when command is complete
 # If no command is given, re-execute the last command and alert
-alert() {
+function alert {
     if [[ $# -eq 0 ]]
     then
         command=$(fc -ln -1)
