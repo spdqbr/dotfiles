@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Set Paths
+export SCRIPTS=/cygdrive/c/scripts
+export PATH=$PATH:$SCRIPTS
+export SHARE_PATH=/cygdrive/c/Share
+
+
 # Applications
 alias jq='/cygdrive/c/apps/jq-1.4/jq.exe'
 alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'

@@ -6,10 +6,7 @@ source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 sourceFiles=("$source_dir/.aliases" "$source_dir/.functions" "$source_dir/transient/dish.source" "$source_dir/transient/cygwin.source")
 
 # Set Paths
-export SCRIPTS=/cygdrive/c/scripts
-export PATH=$PATH:$SCRIPTS
 export CLASSPATH=$CLASSPATH\
-export SHARE_PATH=/cygdrive/c/Share
 
 # Make it easier to swap IFS with new line
 export IFS_DEFAULT=$IFS
@@ -89,9 +86,9 @@ fi \
     export PS1="${PS1}${COLOR_GREEN}${USER}${COLOR_RED}@${COLOR_HOST}${HOST} ${COLOR_BRIGHT}${COLOR_BLACK}${TIME_24}${COLOR_RESET}${COLOR_YELLOW} ${PATH_SHORT} ${NEW_LINE}"
 
     # Command prompt git status if in git repo directory
-    if [[ -f ~/.git-prompt.sh ]]
+    if [[ -f ~/dotfiles/.git-prompt.sh ]]
     then
-        source ~/.git-prompt.sh
+        source ~/dotfiles/.git-prompt.sh
 
         export PS1="${PS1}\
 \$(\

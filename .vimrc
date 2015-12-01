@@ -58,4 +58,3 @@ noremap J mzJ`z
 
 " keep a buffer between the cursor and edge of screen
 set scrolloff=5
-

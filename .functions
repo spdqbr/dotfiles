@@ -331,10 +331,6 @@ function _cdup_complete {
 
 complete -F _cdup_complete cdup
 
-function sudo {
-    cmd /K "runas /user:dhayes.pc@ECHOSTAR \"$@\" "
-}
-
 # resolve dependencies for gem
 function resolve_gem_dependencies {
     tempfile=/tmp/gemlist.txt
@@ -457,5 +453,37 @@ alert() {
     $command \n\
     Failed! Exit code $returnCode"
     fi
+}
+
+# Select columns by name from input
+# e.g.
+# echo -e "a b c d\n1 2 3 4" | colsel d a c
+# will output
+# d    a    c
+# 4    1    3
+function colsel {
+    indicies=""
+    IFS=' '
+    while read line;
+    do
+        if [[ "$indices" == "" ]]
+        then
+            for selected in "$@"
+            do
+                headerPos=1
+
+                for header in ${line[@]}
+                do
+                    if [[ "$selected" == "$header" ]]
+                    then
+                        indices=$indices'$'$headerPos'"\t"'
+                    fi
+                    headerPos=$(( headerPos + 1 ))
+                done
+            done        
+        fi
+
+        echo $line | awk '{print '$indices'; }'
+    done
 }
 
