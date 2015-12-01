@@ -430,7 +430,7 @@ function sanitize {
 
 # popup window when command is complete
 # If no command is given, re-execute the last command and alert
-alert() {
+function alert {
     if [[ $# -eq 0 ]]
     then
         command=$(fc -ln -1)
