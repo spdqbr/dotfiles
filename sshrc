@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+# Shamelessly stolen from https://github.com/Russell91/sshrc
+
 function sshrc() {
     local SSHHOME=${SSHHOME:=~/dotfiles}
     if [ -f $SSHHOME/.bashrc ]; then
