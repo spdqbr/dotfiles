@@ -18,6 +18,19 @@ export CC=gcc
 export CXX=g++
 export EDITOR=vi
 
+# Press Alt-h to read the man page of the first command on the current line
+bind -x '"\eh":
+        FIRST_WORD=${READLINE_LINE%% *}
+        if (( READLINE_POINT > ${#FIRST_WORD} )); then
+                LOOKUP_CMD=${READLINE_LINE::$READLINE_POINT} #grab the string up to the cursor. e.g. "df {} | less" where {} is the cursor looks up df.
+                LOOKUP_CMD=${LOOKUP_CMD##*[;|&]} #remove previous commands from the left
+                LOOKUP_CMD=${LOOKUP_CMD# } #remove leading space if it exists (only a single one though)
+                LOOKUP_CMD=${LOOKUP_CMD%% *} #remove arguments to the current command from the right
+        else
+                LOOKUP_CMD=$FIRST_WORD #if the cursor is at the beginning of the line, look up the first word
+        fi
+        man "$LOOKUP_CMD"'
+
 # If we're in xterm, set up color aliases
 if [[ "$TERM" == "xterm" ]]
 then
@@ -151,15 +164,3 @@ do
 done
 
 
-# Press Alt-h to read the man page of the first command on the current line
-bind -x '"\eh":
-        FIRST_WORD=${READLINE_LINE%% *}
-        if (( READLINE_POINT > ${#FIRST_WORD} )); then
-                LOOKUP_CMD=${READLINE_LINE::$READLINE_POINT} #grab the string up to the cursor. e.g. "df {} | less" where {} is the cursor looks up df.
-                LOOKUP_CMD=${LOOKUP_CMD##*[;|&]} #remove previous commands from the left
-                LOOKUP_CMD=${LOOKUP_CMD# } #remove leading space if it exists (only a single one though)
-                LOOKUP_CMD=${LOOKUP_CMD%% *} #remove arguments to the current command from the right
-        else
-                LOOKUP_CMD=$FIRST_WORD #if the cursor is at the beginning of the line, look up the first word
-        fi
-        man "$LOOKUP_CMD"'
