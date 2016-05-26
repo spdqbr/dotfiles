@@ -143,7 +143,7 @@ export HISTTIMEFORMAT='%F %T '       # Add timestamp to history
 export HISTIGNORE="&:ls:ll:lsd:lsf:ltr:[bf]g:exit:clear:cls:history" 
                                      # Prevent common things from cluttering history
 export HISTIGNORE="$HISTIGNORE:[ ]*" # Prefix command with a space to exclude from history
-export HISTCONTROL=erasedups         # no duplicate entries
+export HISTCONTROL="erasedups:ignoreboth"         # no duplicate entries
 export HISTSIZE=100000               # big big history
 shopt -s histappend                  # append to history, don't overwrite it
 shopt -s histverify                  # load the history command on prompt rather than executing
@@ -153,6 +153,11 @@ export PROMPT_COMMAND="history -a; history -n"
 
 # allow case-insensitive globbing
 shopt -s nocaseglob
+
+# auto complete settings
+bind "set completion-ignore-case on"
+# treat hyphens and underscores the for complete purposes
+bind "set completion-map-case on" 
 
 # Source the files at the top
 for file in ${sourceFiles[@]}

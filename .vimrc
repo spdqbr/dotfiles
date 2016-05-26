@@ -4,6 +4,7 @@ set background=dark
 
 " feedback options
 set number
+set relativenumber
 set ruler
 set showcmd
 
@@ -58,3 +59,7 @@ noremap J mzJ`z
 
 " keep a buffer between the cursor and edge of screen
 set scrolloff=5
+
+" move by virtual lines
+noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
+noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')

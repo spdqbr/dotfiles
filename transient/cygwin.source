@@ -7,7 +7,7 @@ export SHARE_PATH=/cygdrive/c/Share
 
 
 # Applications
-alias jq='/cygdrive/c/apps/jq-1.4/jq.exe'
+alias jq='/cygdrive/c/apps/jq-1.5/jq.exe'
 alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
 alias explorer='explorer .,/e'
 export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
@@ -41,9 +41,9 @@ edit(){
                 touch "$args"
             fi
         fi
-        /cygdrive/c/Program\ Files/Sublime\ Text\ 2/sublime_text.exe "$args" &
+        /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe "$args" &
     else
-        /cygdrive/c/Program\ Files/Sublime\ Text\ 2/sublime_text.exe &
+        /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &
     fi  
 }
 
