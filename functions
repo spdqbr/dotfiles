@@ -487,3 +487,7 @@ function colsel {
     done
 }
 
+function prepareX {
+    sudo yum remove -y gtk2
+    sudo yum install -y xorg-x11-server-Xvfb gdk-pixbuf2 gtk3
+}

@@ -1,9 +1,11 @@
 #!/bin/bash
 
+source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 # If sshrc is available, use it
-if [[ -f ~/dotfiles/sshrc ]]
+if [[ -f "$source_dir/sshrc" ]]
 then
-    alias ssh='~/dotfiles/sshrc'
+    alias ssh="${source_dir}/sshrc"
 fi
 
 # Colorize grep

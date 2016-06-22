@@ -5,7 +5,7 @@ if [[ -f "${HOME}/.bashrc" ]] ; then
     source "${HOME}/.bashrc"
 fi
 
-if [[ -f "${HOME}/dotfiles/.bashrc" ]]
+if [[ -f "##source_dir##/bashrc" ]]
 then
-    source "${HOME}/dotfiles/.bashrc"
+    source "##source_dir##/bashrc"
 fi

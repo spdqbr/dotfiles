@@ -3,7 +3,7 @@
 source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # List of files to look for and source at the end
-sourceFiles=("$source_dir/.aliases" "$source_dir/.functions" "$source_dir/transient/dish.source" "$source_dir/transient/cygwin.source")
+sourceFiles=("$source_dir/aliases" "$source_dir/functions" "$source_dir/transient/dish.source" "$source_dir/transient/cygwin.source")
 
 # Set Paths
 export CLASSPATH=$CLASSPATH\
@@ -99,9 +99,9 @@ fi \
     export PS1="${PS1}${COLOR_GREEN}${USER}${COLOR_RED}@${COLOR_HOST}${HOST} ${COLOR_BRIGHT}${COLOR_BLACK}${TIME_24}${COLOR_RESET}${COLOR_YELLOW} ${PATH_SHORT} ${NEW_LINE}"
 
     # Command prompt git status if in git repo directory
-    if [[ -f ~/dotfiles/.git-prompt.sh ]]
+    if [[ -f "${source_dir}/git-prompt.sh" ]]
     then
-        source ~/dotfiles/.git-prompt.sh
+        source "${source_dir}/git-prompt.sh"
 
         export PS1="${PS1}\
 \$(\

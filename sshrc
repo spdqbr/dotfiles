@@ -2,9 +2,11 @@
 
 # Shamelessly stolen from https://github.com/Russell91/sshrc
 
+source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
 function sshrc() {
-    local SSHHOME=${SSHHOME:=~/dotfiles}
-    if [ -f $SSHHOME/.bashrc ]; then
+    local SSHHOME=${SSHHOME:=$source_dir}
+    if [ -f $SSHHOME/bashrc ]; then
         local files="."
         if [ -d $SSHHOME/.sshrc.d ]; then
             files="$files .sshrc.d"
@@ -32,7 +34,7 @@ elif [ -r ~/.profile ]; then source ~/.profile
 fi
 export PATH=$PATH:$SSHHOME
 if [[ -r ~/.bashrc ]]; then source ~/.bashrc; fi
-source $SSHHOME/.bashrc;
+source $SSHHOME/bashrc;
 chmod -R 755 $SSHHOME
 EOF
 )"' | xxd -p -r > \$SSHHOME/sshrc.bashrc
@@ -45,7 +47,7 @@ if [ -r ~/.bash_profile ]; then source ~/.bash_profile
 elif [ -r ~/.bash_login ]; then source ~/.bash_login
 elif [ -r ~/.profile ]; then source ~/.profile
 fi
-source '$SSHHOME'/.bashrc;
+source '$SSHHOME'/bashrc;
 export PATH=$PATH:'$SSHHOME'
 ') "$@"
 EOF
@@ -57,7 +59,7 @@ EOF
             bash --rcfile \$SSHHOME/sshrc.bashrc
             "
     else
-        echo "No such file: $SSHHOME/.bashrc" >&2
+        echo "No such file: $SSHHOME/bashrc" >&2
         exit 1
     fi
 }
