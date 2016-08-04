@@ -3,7 +3,14 @@
 source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # List of files to look for and source at the end
-sourceFiles=("$source_dir/aliases" "$source_dir/functions" "$source_dir/transient/dish.source" "$source_dir/transient/cygwin.source")
+sourceFiles=()
+
+# Tricky output redirection to prevent subshell creation
+# when piping to while loop so $sourceFiles stays in scope
+while read -d $'\0' file
+do
+  sourceFiles+=("$file")
+done < <(find "$source_dir" -type f -iname \*.source -print0)
 
 # Set Paths
 export CLASSPATH=$CLASSPATH\
