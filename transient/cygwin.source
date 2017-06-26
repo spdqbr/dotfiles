@@ -71,3 +71,5 @@ share(){
     done
 }
 
+
+alias gfsh='/cygdrive/c/Apps/gemfire/bin/gfsh'

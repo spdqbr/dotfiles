@@ -2,28 +2,34 @@
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-function error_handler() {
-  echo ""
-  echo "***************************************"
-  echo "Error occurred in script at line: ${1}."
-  echo "Line exited with status: ${2}"
-  echo "***************************************"
-  echo ""
-}
+true_echo=$(which echo)
 
 log() {
   local level
   level=$1
   shift
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] $level: $@"
+  $true_echo "[$(date +'%Y-%m-%dT%H:%M:%S.%3N%z')] $level: $@"
+}
+
+echo() {
+  log INFO "$@"
 }
 
 info() {
-  log INFO $@
+  log INFO "$@"
 }
 
 err() {
-  log ERROR $@ >&2
+  log ERROR "$@" >&2
+}
+
+function error_handler() {
+  err ""
+  err '***************************************'
+  err "Error occurred in script at line: ${1}."
+  err "Line exited with status: ${2}"
+  err '***************************************'
+  err ""
 }
 
 trap 'error_handler ${LINENO} $?' ERR

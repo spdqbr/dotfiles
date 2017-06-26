@@ -44,7 +44,7 @@ _fd_complete() {
     then
         # Tell complete to only display the last part of the match
         # e.g. if the match is /temp/foo/bar, only display bar
-        _compopt_o_filenames
+        compopt -o filenames
 
         # Extract the fd alias
         fdshort=${word%%/*}

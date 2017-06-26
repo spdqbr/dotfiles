@@ -1,0 +1,59 @@
+#!/bin/bash
+
+alias drm="docker ps -a | awk '{ print $1 ;}' | tail -n +2 | xargs docker rm"
+alias drmi="docker images | awk '{ print $3 ;}' | tail -n +2 | xargs docker rmi"
+alias dockerlogs='docker attach --sig-proxy=false'
+
+alias dockerssh='docker run --tty --interactive --entrypoint /bin/sh'
+
+dockerjoin() {
+  docker exec -i -t $1 /bin/bash
+}
+
+_dockerps_complete() {
+  local word=${COMP_WORDS[COMP_CWORD]}
+  local list=$(docker ps -a | awk '{print $1 ;}' | tail -n +2)
+  local list2=$(docker ps -a | sed -e 's/.* //g' | tail -n +2)
+  list=$( echo -e "${list[@]}\n${list2[@]}" )
+  IFS=$'\n'
+  list=$(compgen -W "${list[@]}" -- "$word")
+  COMPREPLY=($list)
+  return 0
+}
+
+_dockerimages_complete() {
+  local word=${COMP_WORDS[COMP_CWORD]}
+  local list=$(docker images | awk '{ print $3 ;}' | tail -n +2)
+  IFS=$'\n'
+  list=$(compgen -W "${list[@]}" -- "$word")
+  COMPREPLY=($list)
+  return 0
+}
+
+complete -F _dockerps_complete drm
+complete -F _dockerps_complete dockerlogs
+complete -F _dockerps_complete dockerjoin 
+complete -F _dockerimages_complete dockerssh
+
+_docker_complete() {
+  local cur prev list word
+  COMPREPLY=()
+
+  cur=${COMP_WORDS[COMP_CWORD]}
+  prev=${COMP_WORDS[COMP_CWORD-1]}
+  word=${COMP_WORDS[COMP_CWORD]}
+
+  if [[ $COMP_CWORD -eq 1 ]]
+  then
+    list=$( docker --help | sed -n -e '/^Commands:/,/^Run/p' | tail -n +2 | head -n -2 | awk '{print $1 ;}' ) 
+  else
+    list=$( docker images | awk '{ print $3 ;}' | tail -n +2)
+  fi
+  IFS=$'\n'
+  list=$(compgen -W "${list[@]}" -- "$word")
+  COMPREPLY=($list)
+  return 0
+
+}
+
+complete -F _docker_complete docker

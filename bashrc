@@ -120,7 +120,7 @@ then \
     then \
         echo \"${COLOR_BRIGHT}${COLOR_BLUE}\$(__git_ps1 '(%s)')${COLOR_RESET} \"
     else \
-        echo \"${COLOR_DIM}${COLOR_RED}\$(__git_ps1 '(%s)')${COLOR_RESET} \"
+        echo \"${COLOR_RED}\$(__git_ps1 '(%s)')${COLOR_RESET} \"
     fi
 fi\
 )"
