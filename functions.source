@@ -487,7 +487,17 @@ function colsel {
     done
 }
 
+# Install packages for Centos X-Forwarding
 function prepareX {
     sudo yum remove -y gtk2
     sudo yum install -y xorg-x11-server-Xvfb gdk-pixbuf2 gtk3
+}
+
+# List memory usage with PID and command line
+function psmem {
+  ps aux$1  | awk '{ s = ""; for (i = 11; i <= NF; i++) s = s $i " "; print $2 "\t" $6/1024 " MB\t\t" s}'  | sort -n -k2
+}
+
+function pidgrep {
+  ps -ef | egrep "^\w+ +$1 +"
 }
