@@ -2,34 +2,56 @@
 
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-true_echo=$(which echo)
-
 log() {
   local level
   level=$1
   shift
-  $true_echo "[$(date +'%Y-%m-%dT%H:%M:%S.%3N%z')] $level: $@"
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S.%3N%z')] $level: $@"
 }
 
-echo() {
-  log INFO "$@"
+stdout() {
+  if [[ $# -eq 0 ]]
+  then
+    while read line
+    do
+      log INFO "$line"
+    done
+  else
+    log INFO "$@"
+  fi
 }
 
-info() {
-  log INFO "$@"
+stderr() {
+  if [[ $# -eq 0 ]]
+  then
+    while read line
+    do
+      log ERROR "$line" >&2
+    done
+  else
+    log ERROR "$@" >&2
+  fi
 }
 
 err() {
-  log ERROR "$@" >&2
+  if [[ $# -eq 0 ]]
+  then
+    while read line
+    do
+      echo "$line" >&2
+    done
+  else
+    echo "$@" >&2
+  fi
 }
 
-function error_handler() {
-  err ""
-  err '***************************************'
-  err "Error occurred in script at line: ${1}."
-  err "Line exited with status: ${2}"
-  err '***************************************'
-  err ""
+error_handler() {
+  cat <<-EOF >&2
+***************************************
+Error occurred in script at line: ${1}.
+Line exited with status: ${2}
+***************************************
+EOF
 }
 
 trap 'error_handler ${LINENO} $?' ERR
@@ -38,10 +60,20 @@ set -o errexit
 set -o errtrace
 set -o nounset
 
-info "I'm good"
+main() {
+  echo "I'm a log message"
+  err "I'm an error message"
 
-info "script_dir = ${script_dir}"
+  echo "I have $# args"
 
-err "I'm an error log message"
+  for arg in "$@"
+  do
+    echo "arg: '$arg'"
+  done
 
-test 1 -eq 0
+  echo "script_dir = ${script_dir}"
+
+  test 1 -eq 0
+}
+
+{ main "$@" 2>&1 1>&3 3>&- | stderr; } 3>&1 1>&2 | stdout
