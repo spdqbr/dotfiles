@@ -1,7 +1,8 @@
 #!/bin/bash
 
-alias drm='docker ps -a | awk "{ print \$1 ;}" | tail -n +2 | xargs docker rm'
-alias drmi='docker images | awk "{ print \$3 ;}" | tail -n +2 | xargs docker rmi'
+alias drm='_getDockerContainers | xargs docker rm'
+alias drmi='_getDockerImages | xargs docker rmi'
+
 alias dockerlogs='docker attach --sig-proxy=false'
 
 alias dockerssh='docker run --tty --interactive --entrypoint /bin/sh'
@@ -10,11 +11,21 @@ dockerjoin() {
   docker exec -i -t $1 /bin/bash
 }
 
+_getDockerContainers(){
+  local list=$( docker ps -q -a )
+  local list2=$( docker ps -a --format "{{ .Names }}" )
+  echo -e "${list[@]}\n${list2[@]}"
+}
+
+_getDockerImages(){
+  local list=$( docker images -q )
+  local list2=$( docker images --format '{{ print .Repository ":" .Tag }}' | grep -v '<none>' )
+  echo -e "${list[@]}\n${list2[@]}"
+}
+
 _dockerps_complete() {
   local word=${COMP_WORDS[COMP_CWORD]}
-  local list=$(docker ps -a | awk '{print $1 ;}' | tail -n +2)
-  local list2=$(docker ps -a | sed -e 's/.* //g' | tail -n +2)
-  list=$( echo -e "${list[@]}\n${list2[@]}" )
+  list="$( _getDockerContainers )"
   IFS=$'\n'
   list=$(compgen -W "${list[@]}" -- "$word")
   COMPREPLY=($list)
@@ -23,14 +34,14 @@ _dockerps_complete() {
 
 _dockerimages_complete() {
   local word=${COMP_WORDS[COMP_CWORD]}
-  local list=$(docker images | awk '{ print $3 ;}' | tail -n +2)
+  COMP_WORDBREAKS="$(echo $COMP_WORDBREAKS | sed -e 's/://g')"
+  list="$( _getDockerImages )"
   IFS=$'\n'
   list=$(compgen -W "${list[@]}" -- "$word")
   COMPREPLY=($list)
   return 0
 }
 
-complete -F _dockerps_complete drm
 complete -F _dockerps_complete dockerlogs
 complete -F _dockerps_complete dockerjoin 
 complete -F _dockerimages_complete dockerssh
@@ -38,6 +49,10 @@ complete -F _dockerimages_complete dockerssh
 _docker_complete() {
   local cur prev list word
   COMPREPLY=()
+
+  imageCommands=""
+  containerCommands="stop start attach exec kill logs pause restart rm stats top unpause wait"
+  imageCommands="history push rmi save tag"
 
   cur=${COMP_WORDS[COMP_CWORD]}
   prev=${COMP_WORDS[COMP_CWORD-1]}
@@ -47,13 +62,20 @@ _docker_complete() {
   then
     list=$( docker --help | sed -n -e '/^Commands:/,/^Run/p' | tail -n +2 | head -n -2 | awk '{print $1 ;}' ) 
   else
-    list=$( docker images | awk '{ print $3 ;}' | tail -n +2)
+    if [[ " $containerCommands " =~ " $prev " ]]
+    then
+      list="$( _getDockerContainers )"
+    elif [[ " $imageCommands " =~ "$prev" ]]
+    then
+      list="$( _getDockerImages )"
+    else
+      list=""
+    fi
   fi
   IFS=$'\n'
   list=$(compgen -W "${list[@]}" -- "$word")
   COMPREPLY=($list)
   return 0
-
 }
 
 complete -F _docker_complete docker
