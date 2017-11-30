@@ -5,7 +5,7 @@
 #                      to  /nmount/server2/Application/logs
 # by use of "sd server1 server2"
 function sd(){
- cd ${PWD/\/$1\//\/$2\/}
+ cd "${PWD/\/$1\//\/$2\/}"
 }
 
 # frequent directory, used to alias directories
@@ -15,7 +15,7 @@ fd() {
     local fdshort=${1%%/*}
 
     # Find the expansion
-    local equivalent=$( egrep "^$fdshort " ~/.fd | sed -e 's/^[^ ]* //g')
+    local equivalent=$( grep -E "^$fdshort " ~/.fd | sed -e 's/^[^ ]* //g')
 
     if [[ "$equivalent" != "" ]]
     then
@@ -50,7 +50,7 @@ _fd_complete() {
         fdshort=${word%%/*}
         
         # Find its expansion
-        fd=$( egrep "^${fdshort} " ~/.fd | sed -e 's/^[^ ]* //g' -e 's/ /\\ /g' )
+        fd=$( grep -E "^${fdshort} " ~/.fd | sed -e 's/^[^ ]* //g' -e 's/ /\\ /g' )
         
         # if the path is more than one level deep, split out the intermediates
         # e.g. if the command line is fd tmp/foo/bar/blah
@@ -77,7 +77,7 @@ _fd_complete() {
 
         # add the full fd path to the compreply so it doesn't overwrite the commandline
         temp=()
-        for reply in ${COMPREPLY[@]}
+        for reply in "${COMPREPLY[@]}"
         do
            temp+=("${fdshort}/${reply}")
         done
@@ -103,7 +103,7 @@ complete -o nospace -F _fd_complete fd
 # find file
 # searches all subdirectories of . for a file (not directory)
 # containing the given substring (case insensitive)
-ff() { find . -type f -iname '*'$*'*' ; }
+ff() { find . -type f -iname '*'"$*"'*' ; }
 
 # Swap 2 filenames around, if they exist
 swap()
@@ -111,8 +111,8 @@ swap()
     local TMPFILE=tmp.$$ 
 
     [ $# -ne 2 ] && echo "swap: 2 arguments needed" && return 1
-    [ ! -e $1 ] && echo "swap: $1 does not exist" && return 1
-    [ ! -e $2 ] && echo "swap: $2 does not exist" && return 1
+    [ ! -e "$1" ] && echo "swap: $1 does not exist" && return 1
+    [ ! -e "$2" ] && echo "swap: $2 does not exist" && return 1
 
     mv "$1" $TMPFILE 
     mv "$2" "$1"
@@ -121,17 +121,17 @@ swap()
 
 # more thorough evrsion of which, checks aliases and functions
 function which {
-    (alias; declare -f) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot $@
+    (alias; declare -f) | /usr/bin/which --tty-only --read-alias --read-functions --show-tilde --show-dot "$@"
 }
 
 # Pretty print xml
 formatxml(){
     if [[ $# -eq 0 ]]
     then
-        xmlData=`zenity --entry --text="Paste XML Data"`
-        echo $xmlData | xmllint --format -
+        xmlData=$(zenity --entry --text="Paste XML Data")
+        echo "$xmlData" | xmllint --format -
     else
-        xmllint --format $* 2> /dev/null
+        xmllint --format "$@" 2> /dev/null
     fi
 }
 
@@ -169,7 +169,7 @@ pmv(){
 
     while [[ $# -gt 0 ]]
     do
-        newName=`echo "$1" | sed -e "s/$pattern/$replacement/g"`
+        newName=$( echo "$1" | sed -e "s/$pattern/$replacement/g" )
         if [[ "$newName" != "$1" ]]
         then
             echo "mv \"$1\" \"$newName\""
@@ -213,15 +213,15 @@ argsTest ()
 yesno() {
     question=$1
     default=$2
-    echo -n $question
-    read yn
+    echo -n "$question"
+    read -r yn
 
     if [[ "$yn" == "" ]]
     then
         yn=$default
     fi
 
-    yn=`echo $yn | tr '[:lower:]' '[:upper:]'`
+    yn=$( echo "$yn" | tr '[:lower:]' '[:upper:]' )
     if [[ "$yn" == "Y" || "$yn" == "YES" || "$yn" == "T" || "$yn" == "TRUE" || "$yn" == "UH-HUH" || "$yn" == "YUP" || "$yn" == "AFFIRMATIVE" ]]
     then
             return 0
@@ -232,24 +232,24 @@ yesno() {
 
 # Get current screen geometry using xtermcontrol
 getGeom() {
-    current=`xtermcontrol --get-geometry`
+    current=$( xtermcontrol --get-geometry )
 
-    export curW=`echo $current | sed -e 's/x.*//g'`
-    export curH=`echo $current | sed -e 's/.*x\([^+]*\)+.*/\1/g'`
-    export curX=`echo $current | sed -e 's/[^+]*+\(.*\)+.*/\1/g'`
-    export curY=`echo $current | sed -e 's/.*+//g'`
+    export curW=$(echo "$current" | sed -e 's/x.*//g')
+    export curH=$(echo "$current" | sed -e 's/.*x\([^+]*\)+.*/\1/g')
+    export curX=$(echo "$current" | sed -e 's/[^+]*+\(.*\)+.*/\1/g')
+    export curY=$(echo "$current" | sed -e 's/.*+//g')
 }
 
 # Shrink terminal screen to half it's height moving it "half up"
 hu() {
     getGeom;
-    xtermcontrol --geometry=${curW}x$(( curH / 2 ))+${curX}+${curY}
+    xtermcontrol --geometry="${curW}x$(( curH / 2 ))+${curX}+${curY}"
 }
 
 # Expand terminal screen to twice its height, moving it "Double down"
 dd() {
     getGeom;
-    xtermcontrol --geometry=${curW}x$(( curH * 2))+${curX}+${curY}
+    xtermcontrol --geometry="${curW}x$(( curH * 2))+${curX}+${curY}"
 }
 
 # Moves files with a given search string to the given folder
@@ -266,12 +266,12 @@ sortByString() {
 
     if [[ ! -d $dirName ]]
     then
-        mkdir $dirName
+        mkdir "$dirName"
     fi
 
-    for file in $(grep -l "$searchString" $*)
+    for file in $(grep -l "$searchString" "$@")
     do
-        echo $file
+        echo "$file"
         mv "$file" "$dirName/$file"
     done
 }
@@ -279,12 +279,12 @@ sortByString() {
 # Look In Zip (and jar) files for a file containing the search string
 liz() {
     find . -type f \( -iname \*.jar -o -iname \*.zip \) -print | \
-    while read filename
+    while read -r filename
     do 
-        values=`jar -ft "$filename" | egrep "$1"`
+        values=$(jar -ft "$filename" | grep -E "$1")
         if [[ $? -eq 0 ]]
         then
-            echo $filename
+            echo "$filename"
             for value in $values
             do
                 echo "    $value"
@@ -296,7 +296,7 @@ liz() {
 
 # Resize terminal to rows x columns
 resize(){
-    printf "\e[8;$1;$2;t"
+    printf "\\e[8;%s;%s;t" "$1" "$2"
 }
 
 # Find all differences between two folders
@@ -339,7 +339,7 @@ function resolve_gem_dependencies {
 
     grep '^gem' "$@" | \
     sed -e 's/gem "\([^"]*\)", "= \([^"]*\)"/\1:\2/g' | \
-    while read line
+    while read -r line
     do 
         version=${line/#*:/}
         gem=${line/%:*/}
@@ -347,7 +347,7 @@ function resolve_gem_dependencies {
         if [[ $? -ne 0 ]]
         then 
             command="gem install $gem -v $version"
-            echo $command
+            echo "$command"
             $command
         fi
     done
@@ -367,13 +367,16 @@ function bak {
 
     while getopts :fmc FLAG
     do
-        echo $FLAG
-        case $FLAG in
+        echo "$FLAG"
+        case "$FLAG" in
         f) force=0
            ;;
-        m) cmd=mv
+        m) cmd="mv"
            ;;
-        c) cmd=cp
+        c) cmd="cp"
+           ;;
+        *) echo "Unknown flag $FLAG"
+           return
            ;;
         esac
     done
@@ -422,7 +425,7 @@ function bak {
 
 # Sanitize file names/paths for pasting into terminal
 function sanitize {
-    while read arg
+    while read -r arg
     do
         echo "$arg" | sed -e 's/\([-*? ()]\)/\\\1/g'
     done
@@ -444,13 +447,13 @@ function alert {
 
     if [[ $returnCode -eq 0 ]]
     then
-        zenity --info --text="Command \n\
-    $command \n\
+        zenity --info --text="Command \\n\
+    $command \\n\
     Completeded successfully"
 
     else
-        zenity --error --text="Command \n\
-    $command \n\
+        zenity --error --text="Command \\n\
+    $command \\n\
     Failed! Exit code $returnCode"
     fi
 }
@@ -462,9 +465,8 @@ function alert {
 # d    a    c
 # 4    1    3
 function colsel {
-    indicies=""
     IFS=' '
-    while read line;
+    while read -r line;
     do
         if [[ "$indices" == "" ]]
         then
@@ -472,7 +474,7 @@ function colsel {
             do
                 headerPos=1
 
-                for header in ${line[@]}
+                for header in "${line[@]}"
                 do
                     if [[ "$selected" == "$header" ]]
                     then
@@ -483,7 +485,7 @@ function colsel {
             done        
         fi
 
-        echo $line | awk '{print '$indices'; }'
+        echo "$line" | awk '{print '"$indices"'; }'
     done
 }
 
@@ -495,9 +497,9 @@ function prepareX {
 
 # List memory usage with PID and command line
 function psmem {
-  ps aux$1  | awk '{ s = ""; for (i = 11; i <= NF; i++) s = s $i " "; print $2 "\t" $6/1024 " MB\t\t" s}'  | sort -n -k2
+  ps aux"$1"  | awk '{ s = ""; for (i = 11; i <= NF; i++) s = s $i " "; print $2 "\t" $6/1024 " MB\t\t" s}'  | sort -n -k2
 }
 
 function pidgrep {
-  ps -ef | egrep "^\w+ +$1 +"
+  ps -ef | grep -E "^\\w+ +$1 +"
 }

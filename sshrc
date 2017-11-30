@@ -6,14 +6,14 @@ source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 function sshrc() {
     local SSHHOME=${SSHHOME:=$source_dir}
-    if [ -f $SSHHOME/bashrc ]; then
+    if [ -f "$SSHHOME/bashrc" ]; then
         local files="."
-        if [ -d $SSHHOME/.sshrc.d ]; then
+        if [ -d "$SSHHOME/.sshrc.d" ]; then
             files="$files .sshrc.d"
         fi
-        SIZE=$(tar cz -h -C $SSHHOME --exclude=".git" --exclude="transient" $files | wc -c)
-        if [ $SIZE -gt 65536 ]; then
-            echo >&2 $'.sshrc.d and .sshrc files must be less than 64kb\ncurrent size: '$SIZE' bytes'
+        SIZE=$(tar cz -h -C "$SSHHOME" --exclude=".git" --exclude="transient" "$files" | wc -c)
+        if [ "$SIZE" -gt 65536 ]; then
+            echo >&2 $'.sshrc.d and .sshrc files must be less than 64kb\ncurrent size: '"$SIZE"' bytes'
             exit 1
         fi
         ssh -t "$@" "

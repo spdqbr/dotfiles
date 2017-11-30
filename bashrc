@@ -7,7 +7,7 @@ sourceFiles=()
 
 # Tricky output redirection to prevent subshell creation
 # when piping to while loop so $sourceFiles stays in scope
-while read -d $'\0' file
+while read -r -d $'\0' file
 do
   sourceFiles+=("$file")
 done < <(find "$source_dir" -type f -iname \*.source -print0)
@@ -17,7 +17,7 @@ export CLASSPATH=$CLASSPATH\
 
 # Make it easier to swap IFS with new line
 export IFS_DEFAULT=$IFS
-export IFS_NEW_LINE=`echo -en "\b\n"`
+export IFS_NEW_LINE=$( echo -en "\b\n" )
 
 # App specific variables
 export SVN_EDITOR=vi
@@ -39,7 +39,7 @@ bind -x '"\eh":
         man "$LOOKUP_CMD"'
 
 # If we're in xterm, set up color aliases
-if [[ "$TERM" == "xterm" ]]
+if [[ "$TERM" == "xterm" || "$TERM" == "cygwin" ]]
 then
     COLOR_BLACK="\[\e[30m\]"
     COLOR_RED="\[\e[31m\]"
@@ -138,7 +138,7 @@ fi\
         trap 'echo -ne "\e]0;$BASH_COMMAND\007"' DEBUG
         
         # Set the title to the pwd when no command is running
-        export PS1="\e]0;${USER}@${HOST}:${PATH_SHORT}\007$PS1"
+        export PS1="\[\e]0;\]${USER}@${HOST}:${PATH_SHORT}\007$PS1"
     fi
 fi
 
@@ -167,7 +167,7 @@ bind "set completion-ignore-case on"
 bind "set completion-map-case on" 
 
 # Source the files at the top
-for file in ${sourceFiles[@]}
+for file in "${sourceFiles[@]}"
 do
     if [[ -f "$file" ]]
     then

@@ -8,7 +8,7 @@ alias dockerlogs='docker attach --sig-proxy=false'
 alias dockerssh='docker run --tty --interactive --entrypoint /bin/sh'
 
 dockerjoin() {
-  docker exec -i -t $1 /bin/bash
+  docker exec -i -t "$1" /bin/bash
 }
 
 _getDockerContainers(){
@@ -28,17 +28,17 @@ _dockerps_complete() {
   list="$( _getDockerContainers )"
   IFS=$'\n'
   list=$(compgen -W "${list[@]}" -- "$word")
-  COMPREPLY=($list)
+  COMPREPLY=("$list")
   return 0
 }
 
 _dockerimages_complete() {
   local word=${COMP_WORDS[COMP_CWORD]}
-  COMP_WORDBREAKS="$(echo $COMP_WORDBREAKS | sed -e 's/://g')"
+  COMP_WORDBREAKS="${COMP_WORDBREAKS//:/}"
   list="$( _getDockerImages )"
   IFS=$'\n'
   list=$(compgen -W "${list[@]}" -- "$word")
-  COMPREPLY=($list)
+  COMPREPLY=("$list")
   return 0
 }
 
@@ -62,10 +62,10 @@ _docker_complete() {
   then
     list=$( docker --help | sed -n -e '/^Commands:/,/^Run/p' | tail -n +2 | head -n -2 | awk '{print $1 ;}' ) 
   else
-    if [[ " $containerCommands " =~ " $prev " ]]
+    if [[ " $containerCommands " =~  $prev  ]]
     then
       list="$( _getDockerContainers )"
-    elif [[ " $imageCommands " =~ "$prev" ]]
+    elif [[ " $imageCommands " =~ $prev ]]
     then
       list="$( _getDockerImages )"
     else

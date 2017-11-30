@@ -1,75 +1,79 @@
 #!/bin/bash
 
-# Set Paths
-export SCRIPTS=/cygdrive/c/scripts
-export PATH=$PATH:$SCRIPTS
-export SHARE_PATH=/cygdrive/c/Share
+if [[ $(uname) =~ CYGWIN.* ]]
+then
+  # Set Paths
+  export SCRIPTS=/cygdrive/c/scripts
+  export PATH=$PATH:$SCRIPTS
+  export SHARE_PATH=/cygdrive/c/Share
 
 
-# Applications
-alias jq='/cygdrive/c/apps/jq-1.5/jq.exe'
-alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
-alias explorer='explorer .,/e'
-export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
-alias zenity='/cygdrive/c/Program\ Files\ \(x86\)/zenity/bin/zenity.exe'
+  # Applications
+  alias jq='/cygdrive/c/apps/jq-1.5/jq.exe'
+  alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
+  alias explorer='explorer .,/e'
+  export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
+  alias zenity='/cygdrive/c/Program\ Files\ \(x86\)/zenity/bin/zenity.exe'
 
-jd() {
-    /cygdrive/c/Apps/jd-gui/jd-gui.exe $* &
-}
+  jd() {
+      /cygdrive/c/Apps/jd-gui/jd-gui.exe "$@" &
+  }
 
-windiff() {
-    /cygdrive/c/Program\ Files\ \(x86\)/WinMerge/WinMergeU.exe "`cygpath -d "$1"`" "`cygpath -d "$2"`"
-}
-
-
-
-# Shortcuts
-alias hosts='vi /cygdrive/c/Windows/System32/drivers/etc/hosts'
-alias netpath='cygpath -w -l $PWD'
-
-# opens the given file in editor
-edit(){
-    args=
-    if [[ "$1" != "" ]]
-    then
-        args=`cygpath -d "$1"`
-        if [[ ! -f "$1" ]]
-        then
-            yesno "File '$1' does not exist, create it? (Y/n): " "Y" 
-            if [[ $? -eq 0 ]]
-            then
-                touch "$args"
-            fi
-        fi
-        /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe "$args" &
-    else
-        /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &
-    fi  
-}
-
-alias notepad="edit"
-alias textpad="edit"
-
-# copies to windows share and grants full control to everyone
-cpshare(){
-   share cp $*
-}
-
-# moves to windows share and grants full control to everyone
-mvshare(){
-   share mv $*
-}
-
-# move or copy to windows share and grant full control to everyone
-share(){
-    command=$1; shift;
-    $command $* $SHARE_PATH;
-    for file in $*;
-    do
-        chmod 777 $SHARE_PATH/$file
-        CACLS `cygpath -d "$SHARE_PATH/$file"` /E /G Everyone:F
-    done
-}
+  windiff() {
+      /cygdrive/c/Program\ Files\ \(x86\)/WinMerge/WinMergeU.exe "$(cygpath -d "$1")" "$(cygpath -d "$2")"
+  }
 
 
-alias gfsh='/cygdrive/c/Apps/gemfire/bin/gfsh'
+
+  # Shortcuts
+  alias hosts='vi /cygdrive/c/Windows/System32/drivers/etc/hosts'
+  alias netpath='cygpath -w -l $PWD'
+
+  # opens the given file in editor
+  edit(){
+      args=
+      if [[ "$1" != "" ]]
+      then
+          args=$(cygpath -d "$1")
+          if [[ ! -f "$1" ]]
+          then
+              if yesno "File '$1' does not exist, create it? (Y/n): " "Y" 
+              then
+                  touch "$args"
+              fi
+          fi
+          /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe "$args" &
+      else
+          /cygdrive/c/Program\ Files/Sublime\ Text\ 3/sublime_text.exe &
+      fi  
+  }
+
+  alias notepad="edit"
+  alias textpad="edit"
+
+  # copies to windows share and grants full control to everyone
+  cpshare(){
+     share cp "$@"
+  }
+
+  # moves to windows share and grants full control to everyone
+  mvshare(){
+     share mv "$@"
+  }
+
+  # move or copy to windows share and grant full control to everyone
+  share(){
+      command=$1
+      shift
+      $command "$@" "$SHARE_PATH"
+
+      for file in "$@"
+      do
+          chmod 777 "$SHARE_PATH/$file"
+          CACLS "$( cygpath -d "$SHARE_PATH/$file" )" /E /G Everyone:F
+      done
+  }
+
+
+  alias gfsh='/cygdrive/c/Apps/gemfire/bin/gfsh'
+fi

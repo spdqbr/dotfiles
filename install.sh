@@ -4,7 +4,7 @@ source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 backupFiles=( "${HOME}/.bash_profile" "${HOME}/.vimrc" )
 
-for file in ${backupFiles[@]}
+for file in "${backupFiles[@]}"
 do
     if [[ -f "$file" ]]
     then
