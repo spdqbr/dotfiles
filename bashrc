@@ -39,7 +39,7 @@ bind -x '"\eh":
         man "$LOOKUP_CMD"'
 
 # If we're in xterm, set up color aliases
-if [[ "$TERM" == "xterm" || "$TERM" == "cygwin" ]]
+if [[ "$TERM" == "xterm" ]] || [[ "$TERM" == "cygwin" ]]
 then
     COLOR_BLACK="\[\e[30m\]"
     COLOR_RED="\[\e[31m\]"

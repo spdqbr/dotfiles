@@ -55,7 +55,7 @@ alias hosts='vi /etc/hosts'
 alias waitfor='while [[ $? -ne 0 ]]; do `fc -ln -1`; done'
 
 # Look for files containing the search string recursively in pwd
-alias findstr='find . -type f ! -path "*/.svn/*" ! -path "*/.git/*" -print0 2> /dev/null | xargs -0 egrep'
+alias findstr='find . \( -name .svn -o -name .git \) -prune -o -type f -print0 2> /dev/null | xargs -0 egrep'
 
 # md5sum pwd
 alias md5='find . -type f -print0 | xargs -0 md5sum | tee "${PWD/*\//}.md5"'
@@ -91,10 +91,10 @@ alias striplines="awk '{ printf \"%s\", \$0 }'"
 alias striplinesmark="awk '{ printf \"%s::NEWLINE::\", \$0 }'"
 
 # creates  a tree representation of the current directory structure
-alias dirf='find . -type d | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+alias dirf='find . -name .git -prune -o -type d | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
 
 # creates  a tree representation of the current directory structure with files shown
-alias filef='find . | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+alias filef='find . -name .git -prune -o -print | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
 
 # Shares the current directory on http://<machine_name>:8000 
 alias webshare='python -m SimpleHTTPServer 8001'
@@ -104,3 +104,6 @@ alias sync='rsync --recursive --times --delete-during --stats --human-readable -
 
 # order files in this and all subdirectories by date modified (useful with | head -# or | tail -# )
 alias recentmod='find . -type f -printf "%TY-%Tm-%Td %TT %p\n" | sort -r'
+
+# get memory usage by pid
+alias memusage='ps -e -o pid,vsz,comm= | sort -n -k 2'

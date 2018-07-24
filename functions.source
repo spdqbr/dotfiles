@@ -278,10 +278,23 @@ sortByString() {
 
 # Look In Zip (and jar) files for a file containing the search string
 liz() {
+    if which jar 1> /dev/null 2> /dev/null
+    then
+      unzip_cmd="$(which jar)"
+      unzip_args="-ft"
+    elif which unzip 1> /dev/null 2> /dev/null
+    then
+      unzip_cmd="$(which unzip)"
+      unzip_args="-l"
+    else
+      echo "Could not find unzip or jar command in path" 1>&2
+      return 1
+    fi
+
     find . -type f \( -iname \*.jar -o -iname \*.zip \) -print | \
     while read -r filename
     do 
-        values=$(jar -ft "$filename" | grep -E "$1")
+        values=$( "$unzip_cmd" $unzip_args "$filename" | grep -E "$1")
         if [[ $? -eq 0 ]]
         then
             echo "$filename"

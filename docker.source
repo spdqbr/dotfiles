@@ -7,6 +7,8 @@ alias dockerlogs='docker attach --sig-proxy=false'
 
 alias dockerssh='docker run --tty --interactive --entrypoint /bin/sh'
 
+alias dfimage='docker run -v /var/run/docker.sock:/var/run/docker.sock --rm chenzj/dfimage'
+
 dockerjoin() {
   docker exec -i -t "$1" /bin/bash
 }
@@ -50,7 +52,7 @@ _docker_complete() {
   local cur prev list word
   COMPREPLY=()
 
-  imageCommands=""
+  bothCommands="inspect"
   containerCommands="stop start attach exec kill logs pause restart rm stats top unpause wait"
   imageCommands="history push rmi save tag"
 
@@ -62,7 +64,12 @@ _docker_complete() {
   then
     list=$( docker --help | sed -n -e '/^Commands:/,/^Run/p' | tail -n +2 | head -n -2 | awk '{print $1 ;}' ) 
   else
-    if [[ " $containerCommands " =~  $prev  ]]
+    if [[ " $bothCommands " =~ " $prev " ]]
+    then
+      list="$( _getDockerContainers )"
+      list2="$( _getDockerImages )"
+      list="$( echo -e ${list[@]}'\n' ${list2[@]} )"
+    elif [[ " $containerCommands " =~ " $prev " ]]
     then
       list="$( _getDockerContainers )"
     elif [[ " $imageCommands " =~ $prev ]]

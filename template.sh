@@ -47,10 +47,10 @@ err() {
 
 error_handler() {
   cat <<-EOF >&2
-***************************************
-Error occurred in script at line: ${1}.
-Line exited with status: ${2}
-***************************************
+  ***************************************
+  Error occurred in script at line: ${1}.
+  Line exited with status: ${2}
+  ***************************************
 EOF
 }
 
