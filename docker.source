@@ -1,7 +1,10 @@
 #!/bin/bash
 
-alias drm='_getDockerContainers | xargs docker rm'
-alias drmi='_getDockerImages | xargs docker rmi'
+alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm chenzj/dfimage"
+
+
+alias drm='docker ps -q -a | xargs docker rm'
+alias drmi='docker images -q -a | xargs docker rmi'
 
 alias dockerlogs='docker attach --sig-proxy=false'
 
