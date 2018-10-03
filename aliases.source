@@ -98,6 +98,7 @@ alias filef='find . -name .git -prune -o -print | sed -e "s/[^-][^\/]*\//  |/g" 
 
 # Shares the current directory on http://<machine_name>:8000 
 alias webshare='python -m SimpleHTTPServer 8001'
+alias fancywebshare='twistd -n web -p 8001 --path .'
 
 # Sync two folders
 alias sync='rsync --recursive --times --delete-during --stats --human-readable -h --progress'
