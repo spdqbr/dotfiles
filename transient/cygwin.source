@@ -12,6 +12,7 @@ then
   alias jq='/cygdrive/c/apps/jq-1.5/jq.exe'
   alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
   alias explorer='explorer .,/e'
+  alias ping='/cygdrive/c/windows/system32/ping.exe'
   export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
   alias zenity='/cygdrive/c/Program\ Files\ \(x86\)/zenity/bin/zenity.exe'
 
