@@ -45,11 +45,15 @@ err() {
   fi
 }
 
+this_script="${BASH_SOURCE[0]}"
+
+# Clearer errors on bash failure
 error_handler() {
   cat <<-EOF >&2
   ***************************************
-  Error occurred in script at line: ${1}.
+  Error occurred in "${this_script} at line: ${1}.
   Line exited with status: ${2}
+  $(cat -n "$this_script" | grep -e "^[ \t]*${1}\W")
   ***************************************
 EOF
 }

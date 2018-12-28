@@ -77,4 +77,12 @@ then
 
 
   alias gfsh='/cygdrive/c/Apps/gemfire/bin/gfsh'
+
+  #Copy current line to clipboard
+  copyline() { printf %s "$READLINE_LINE" | putclip; }
+
+  #Bind above to Ctrl-x,c
+  bind -x '"\C-xc":copyline'
+
+  alias copylast="history -p '!!' | putclip"
 fi

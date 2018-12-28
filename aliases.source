@@ -108,3 +108,5 @@ alias recentmod='find . -type f -printf "%TY-%Tm-%Td %TT %p\n" | sort -r'
 
 # get memory usage by pid
 alias memusage='ps -e -o pid,vsz,comm= | sort -n -k 2'
+
+alias gcm='git checkout master'
