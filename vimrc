@@ -4,7 +4,6 @@ set background=dark
 
 " feedback options
 set number
-set relativenumber
 set ruler
 set showcmd
 

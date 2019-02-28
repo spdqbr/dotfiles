@@ -142,9 +142,6 @@ fi\
     fi
 fi
 
-# enable vi style editing on command line
-set -o vi
-
 # History setup
 export HISTTIMEFORMAT='%F %T '       # Add timestamp to history
 export HISTIGNORE="&:ls:ll:lsd:lsf:ltr:[bf]g:exit:clear:cls:history" 
@@ -175,4 +172,6 @@ do
     fi
 done
 
+# enable vi style editing on command line
+set -o vi
 
