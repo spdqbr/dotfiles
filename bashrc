@@ -152,6 +152,11 @@ export HISTSIZE=100000               # big big history
 shopt -s histappend                  # append to history, don't overwrite it
 shopt -s histverify                  # load the history command on prompt rather than executing
 
+shopt -s autocd     # cd by typing the folder name only
+shopt -s direxpand  # ./[TAB] becomes $(pwd)
+shopt -s globstar   # ls -l ** recursively lists directories
+shopt -s extglob    # extended globbing ?(a*|b*) a* or b*, !(a*|b*) NOT a* nor b*, *+@ == *+? regex
+
 # Save and reload the history after each command finishes (allows common history across several terminals)
 export PROMPT_COMMAND="history -a; history -n"
 
