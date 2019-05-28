@@ -9,7 +9,7 @@ then
 
 
   # Applications
-  alias jq='/cygdrive/c/apps/jq-1.5/jq.exe'
+  alias jq='/cygdrive/c/apps/jq-win64.exe'
   alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
   alias explorer='explorer .,/e'
   alias ping='/cygdrive/c/windows/system32/ping.exe'

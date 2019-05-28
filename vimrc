@@ -62,3 +62,6 @@ set scrolloff=5
 " move by virtual lines
 noremap <silent> <expr> j (v:count == 0 ? 'gj' : 'j')
 noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
+
+" use F3 to toggle between paste mode (no-autoindent) and regular mode
+set pastetoggle=<F3>
