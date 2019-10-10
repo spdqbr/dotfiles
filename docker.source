@@ -17,6 +17,10 @@ dockerjoin() {
   docker exec -i -t "$1" /bin/bash
 }
 
+dockerjoinsh() {
+  docker exec -i -t "$1" /bin/sh
+}
+
 _getDockerContainers(){
   local list=$( docker ps -q -a )
   local list2=$( docker ps -a --format "{{ .Names }}" )
