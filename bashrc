@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# Don't source again if already sourced
+if [[ "$SPDQBR_DOTFILES" == "1" ]]; then
+  return
+else
+  export SPDQBR_DOTFILES=1
+fi
+
 source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # List of files to look for and source at the end
@@ -39,7 +46,7 @@ bind -x '"\eh":
         man "$LOOKUP_CMD"'
 
 # If we're in xterm, set up color aliases
-if [[ "$TERM" == "xterm" ]] || [[ "$TERM" == "cygwin" ]]
+if [[ "$TERM" =~ .*xterm.* ]] || [[ "$TERM" == "cygwin" ]]
 then
     COLOR_BLACK="\[\e[30m\]"
     COLOR_RED="\[\e[31m\]"
