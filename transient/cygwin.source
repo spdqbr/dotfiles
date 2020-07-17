@@ -6,15 +6,15 @@ then
   export SCRIPTS=/cygdrive/c/scripts
   export PATH=$PATH:$SCRIPTS
   export SHARE_PATH=/cygdrive/c/Share
+  
+  alias sudo='cygstart --action=runas "$@"'
 
 
   # Applications
   alias xtermcontrol='/cygdrive/c/apps/xtermcontrol-3.2/src/xtermcontrol.exe'
   alias explorer='explorer .,/e'
   alias ping='/cygdrive/c/windows/system32/ping.exe'
-  export ZENITY_DATADIR="c:\\Program Files (x86)\\zenity\\share\\"
-  alias zenity='/cygdrive/c/Program\ Files\ \(x86\)/zenity/bin/zenity.exe'
-  alias shellcheck='/cygdrive/c/apps/shellcheck-latest.exe'
+  alias shellcheck='/cygdrive/c/apps/shellcheck-stable.exe'
 
   jd() {
       /cygdrive/c/Apps/jd-gui/jd-gui.exe "$@" &

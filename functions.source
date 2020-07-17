@@ -183,6 +183,50 @@ pmv(){
     done
 }
 
+# Multi-pattern move
+# do multiple pattern substitutions on multiple files
+# Defaults to dry run. First argument == "!" to actually do the move
+# Example:
+# Files in dir: "foo bar baz.txt" "bing-bang bong.txt"
+# >   mpmv ! " " "-" 'o' '0' -- *
+# "f00-bar-baz.txt" "bing-bang-b0ng.txt"
+mpmv () {
+  dryRun=0
+  if [[ "$1" == "!" ]]; then
+    dryRun=1
+    shift
+  fi
+
+  ops=()
+
+  while [[ ! -z $1 ]]; do
+    pat=$1; shift
+    if [[ "$pat" == "--" ]]; then
+      break
+    fi
+    rep=$1; shift
+    ops+=("$pat")
+    ops+=("$rep")
+  done
+
+  echo "All: ${ops[@]}"
+
+  for file in "$@"; do
+    echo "file: $file"
+    new=$file
+    for (( i=0; i<${#ops[@]}; i+=2)); do
+      new=$( echo "$new" | sed -e "s/${ops[i]}/${ops[$(( i + 1 ))]}/g" )
+    done
+    echo "new:  $new"
+    if [[ "$dryRun" == "1" ]]; then
+      if [[ "$file" != "$new" ]]; then
+        mv "$file" "$new"
+      fi
+    fi
+    echo ""
+  done
+}
+
 # Quickly test how bash handles lists of args
 argsTest ()
 {
@@ -536,4 +580,14 @@ urlencode() {
     fi
     echo "${data##/?}"
     return 0
+}
+
+vb() {
+  if [[ -f ./vb.sh ]]; then
+    ./vb.sh
+  else
+    vagrant halt
+    vagrant up
+    vagrant ssh
+  fi
 }

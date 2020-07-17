@@ -1,6 +1,6 @@
 #!/bin/bash
 
-alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock --rm chenzj/dfimage"
+alias dfimage="docker run -v /var/run/docker.sock:/var/run/docker.sock:Z --rm chenzj/dfimage"
 
 
 alias drm='docker ps -q -a | xargs docker rm'
@@ -8,8 +8,8 @@ alias drmi='docker images -q -a | xargs docker rmi'
 
 alias dockerlogs='docker attach --sig-proxy=false'
 
-alias dockerssh='docker run --rm --tty --interactive --volume "$PWD":/host --entrypoint /bin/bash'
-alias dockersh='docker run --rm --tty --interactive --volume "$PWD":/host --entrypoint /bin/sh'
+alias dockerssh='docker run --rm --tty --interactive --user "$(id -u)" --volume "$PWD":/host:Z --entrypoint /bin/bash'
+alias dockersh='docker run --rm --tty --interactive --user "$(id -u)" --volume "$PWD":/host:Z --entrypoint /bin/sh'
 
 alias dfimage='docker run -v /var/run/docker.sock:/var/run/docker.sock --rm chenzj/dfimage'
 

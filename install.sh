@@ -14,7 +14,7 @@ done
 
 cp "${source_dir}/bash_profile" "${HOME}/.bash_profile"
 
-echo sed -ie "s@##source_dir##@$source_dir@g" "${HOME}/.bash_profile"
-sed -ie "s@##source_dir##@$source_dir@g" "${HOME}/.bash_profile"
+echo sed -i.bak -e "s@##source_dir##@$source_dir@g" "${HOME}/.bash_profile"
+sed -i.bak -e "s@##source_dir##@$source_dir@g" "${HOME}/.bash_profile"
 
 cp "${source_dir}/vimrc" "${HOME}/.vimrc"

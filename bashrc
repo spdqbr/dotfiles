@@ -98,7 +98,7 @@ then
     fi  
 
     # Command prompt smiley face on success, scared face on failure
-    export PS1="${NEW_LINE}\
+  export PS1="${NEW_LINE}\
 \$(\
 if [[ \$? -eq 0 ]]; \
 then \
@@ -186,4 +186,3 @@ done
 
 # enable vi style editing on command line
 set -o vi
-
