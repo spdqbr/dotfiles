@@ -591,3 +591,8 @@ vb() {
     vagrant ssh
   fi
 }
+
+mcd() {
+  mkdir "$1" && cd "$1"
+}
+  
