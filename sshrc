@@ -35,6 +35,7 @@ fi
 export PATH=$PATH:$SSHHOME
 if [[ -r ~/.bashrc ]]; then source ~/.bashrc; fi
 source $SSHHOME/bashrc;
+alias vi="vi -u $SSHHOME/vimrc";
 chmod -R 755 $SSHHOME
 EOF
 )"' | xxd -p -r > \$SSHHOME/sshrc.bashrc

@@ -5,7 +5,7 @@ source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 # If sshrc is available, use it
 if [[ -f "$source_dir/sshrc" ]]
 then
-    alias ssh="${source_dir}/sshrc"
+    alias ssh="bash ${source_dir}/sshrc"
 fi
 
 # Colorize grep
@@ -57,6 +57,9 @@ alias waitfor='while [[ $? -ne 0 ]]; do `fc -ln -1`; done'
 # Look for files containing the search string recursively in pwd
 alias findstr='find . \( -name .svn -o -name .git \) -prune -o -type f -print0 2> /dev/null | xargs -0 egrep'
 
+# Same as above, but only print filenames
+alias findstrf='find . \( -name .svn -o -name .git \) -prune -o -type f -print0 2> /dev/null | xargs -0 egrep -l'
+
 # md5sum pwd
 alias md5='find . -type f -print0 | xargs -0 md5sum | tee "${PWD/*\//}.md5"'
 
@@ -88,16 +91,17 @@ alias decolor='sed -r "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"'
 
 # Above replaced with simpler/faster awk equivalents
 alias striplines="awk '{ printf \"%s\", \$0 }'"
-alias striplinesmark="awk '{ printf \"%s::NEWLINE::\", \$0 }'"
+alias striplinesmark="awk '{ printf \"%s\\\n\", \$0 }'"
 
 # creates  a tree representation of the current directory structure
 alias dirf='find . -name .git -prune -o -type d | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
 
 # creates  a tree representation of the current directory structure with files shown
-alias filef='find . -name .git -prune -o -print | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+alias treesed='find . -name .git -prune -o -print | sed -e "s/[^-][^\/]*\//  |/g" -e "s/|\([^ ]\)/|-\1/"'
+alias filef='( which tree &> /dev/null && tree ) || treesed'
 
 # Shares the current directory on http://<machine_name>:8000 
-alias webshare='python -m SimpleHTTPServer 8001'
+alias webshare='python -m http.server 8001'
 alias fancywebshare='twistd -n web -p 8001 --path .'
 
 # Sync two folders
@@ -114,4 +118,3 @@ alias gcm='git checkout master'
 # Vagrant Aliases
 # vb = vagrant bounce
 #alias vb='vagrant halt && vagrant up && vagrant ssh'
-alias vssh='vagrant ssh'

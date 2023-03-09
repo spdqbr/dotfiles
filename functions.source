@@ -367,6 +367,8 @@ foldiff() {
 # cdup logs
 # to switch to /var/logs
 function cdup {
+    #If no arg, go up one directory
+    [[ -z "$1" ]] && cd .. && return 0
     newdir="${PWD/\/$1\/*/}/$1"
     if [[ -d "$newdir" ]]
     then
@@ -562,9 +564,20 @@ function pidgrep {
 }
 
 function lazygit {
-  git add .
+  git add --all .
   git commit -m "$@"
   git push
+}
+
+# Update file permissions in git index
+gitchmod() {
+  mode="$1"
+  shift
+  git update-index --chmod="${mode}" "$@"
+}
+
+gitls() {
+  git ls-files --stage
 }
 
 urlencode() {
@@ -596,3 +609,17 @@ mcd() {
   mkdir "$1" && cd "$1"
 }
   
+function vssh {
+  /usr/bin/ssh -i ./.vagrant/machines/default/virtualbox/private_key -p 2222 vagrant@127.0.0.1
+}
+
+venv() {
+  if [[ ! -d ./venv ]]; then
+    python3 -m venv venv
+  fi
+  source ./venv/bin/activate
+}
+
+epoch() {
+  date -d @"$1"
+}
