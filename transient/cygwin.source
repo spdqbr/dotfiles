@@ -7,7 +7,7 @@ then
   export PATH=$PATH:$SCRIPTS
   export SHARE_PATH=/cygdrive/c/Share
   
-  alias sudo='cygstart --action=runas "$@"'
+  alias sudo='cygstart --action=runas'
 
 
   # Applications

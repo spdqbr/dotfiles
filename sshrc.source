@@ -1,0 +1,136 @@
+#!/user/bin/env bash
+
+SSHRC_HOME=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+export SSHRC_HOME
+
+function sshrc() {
+  if command -v base64 &>/dev/null; then
+    local remote_ssh_command
+    remote_ssh_command=$(get_function_def _sshrc_remote_command)
+    local bundle_size=${#remote_ssh_command}
+    if ((bundle_size > 65536)); then
+      printf 1>&2 "File bundle must be less than 64kb\ncuurent size: %d  bytes\n" "${bundle_size}"
+      return 1
+    fi
+
+    ssh -t "$@" "command -v base64 &> /dev/null || { echo 1>&2 \"sshrc requires base64 to be installed on the remote server, but it isn't. Failing back to bash\"; bash; exit; }
+      set -e
+      ${remote_ssh_command}"
+  else
+    echo 2>&1 "sshrc: base64 command not found, using regular ssh"
+    ssh "$@"
+  fi
+}
+
+# This lets us shellcheck the functions rather than just storing as strings
+function get_function_def() {
+  if def=$(declare -f "$1" | head -n -1 | tail -n +3); then
+
+    # Recursively replace any RAW_xxx strings
+    # with the base64 encoded function definition of xxx
+    while read -r raw_func; do
+      sub_def=$(get_function_def "${raw_func#RAW_}" |
+        base64 -w0)
+
+      def=${def//${raw_func}/${sub_def}}
+    done < <(echo "${def}" | grep -o -E "\bRAW_\w*")
+
+    # Recursively replace any EXEC_xxx strings
+    # with the output of the function xxx
+    while read -r exec_func; do
+      sub_def=$( "${exec_func#EXEC_}" )
+
+      def=${def//${exec_func}/${sub_def}}
+    done < <(echo "${def}" | grep -o -E "\bEXEC_\w*")
+
+    echo "${def}"
+  else
+    echo ""
+  fi
+}
+
+#shellcheck disable=SC1091,SC1090
+function _sshrc_bashrc_contents() {
+  if [[ -r /etc/profile ]]; then source /etc/profile; fi
+  if [[ -r "${HOME}/.bash_profile" ]]; then
+    source "${HOME}/.bash_profile"
+  elif [[ -r "${HOME}/.bash_login" ]]; then
+    source "${HOME}/.bash_login"
+  elif [[ -r "${HOME}/.profile" ]]; then
+    source "${HOME}/.profile"
+  elif [[ -r "${HOME}/.bashrc" ]]; then
+    source "${HOME}/.bashrc"
+  fi
+
+  export PATH=${PATH}:${SSHRC_HOME}
+  if [[ -r "${SSHRC_HOME}/.sshrc_bashrc" ]]; then source "${SSHRC_HOME}/.sshrc_bashrc"; fi
+}
+
+_sshrc_bundle_files() {
+  local -a excludes
+  if [[ -r "${SSHRC_HOME}/.sshrc_excludes" ]]; then
+    read -d '' -ra excludes <"${SSHRC_HOME}/.sshrc_excludes"
+  fi
+
+  excludes+=('*.git*')
+
+  # Prepend --exclude and convert to an array so args split correctly
+  read -ra excludes < <(echo "${excludes[@]/#/--exclude }")
+
+  local -a files
+  if [[ -r "${HOME}/.sshrc_files" ]]; then
+    read -d '' -ra files < <(envsubst <"${HOME}/.sshrc_files")
+  fi
+
+  if [[ -r "${HOME}/.sshrc_bashrc" ]]; then
+    files+=("${HOME}/.sshrc_bashrc")
+  fi
+
+  # Copy all extra files into the tarball root
+  # TODO: allow placement of extra files on the remote via .sshrc_files
+  local -a file_transforms
+  for file in "${files[@]}"; do
+    local dirname
+    dirname=$(dirname "${file}")
+    dirname=${dirname#/}
+    file_transforms+=( "s,${dirname}/,," )
+  done
+
+  # Include the SSHRC_HOME at the tarball root
+  files+=(".")
+
+  # Dedup the prefix list and prepend --transform
+  read -d "" -ra file_transforms < <(printf '%s\n' "${file_transforms[@]}" | sort -u)
+  read -ra file_transforms < <(echo "${file_transforms[@]/#--transform /}")
+
+  # echo -- "tar -czh -C" "${SSHRC_HOME}" "${excludes[@]}" "${file_transforms[@]}" "${files[@]}" 2>/dev/null
+  tar -czh -C "${SSHRC_HOME}" "${excludes[@]}" "${file_transforms[@]}" "${files[@]}" 2>/dev/null |
+    base64 -w0
+}
+
+function _sshrc_local_whoami() {
+  whoami
+}
+
+# shellcheck disable=SC2064
+function _sshrc_remote_command() {
+  set -e
+  if [[ -r /etc/motd ]]; then
+    cat /etc/motd
+  fi
+
+  source_whoami="EXEC__sshrc_local_whoami"
+  SSHRC_HOME=$(mktemp -d -t ".${source_whoami}.$(whoami).sshrc.XXXX")
+  export SSHRC_HOME
+
+  trap "rm -rf '${SSHRC_HOME}'; exit" 0
+
+  echo "RAW__sshrc_bashrc_contents" | base64 -d >"${SSHRC_HOME}/sshrc.bashrc.base"
+
+  set +x
+  echo 'EXEC__sshrc_bundle_files' |
+     base64 -d |
+     tar -mxzf - -C "${SSHRC_HOME}"
+
+  bash --rcfile "${SSHRC_HOME}"/sshrc.bashrc.base
+}

@@ -3,9 +3,9 @@
 source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # If sshrc is available, use it
-if [[ -f "$source_dir/sshrc" ]]
+if [[ -r "${source_dir}/sshrc.source" ]]
 then
-    alias ssh="bash ${source_dir}/sshrc"
+    alias ssh=sshrc
 fi
 
 # Colorize grep
@@ -118,3 +118,5 @@ alias gcm='git checkout master'
 # Vagrant Aliases
 # vb = vagrant bounce
 #alias vb='vagrant halt && vagrant up && vagrant ssh'
+
+alias reddit='cat /dev/clipboard | sed -e "s/^/    /g"'
