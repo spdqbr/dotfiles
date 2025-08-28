@@ -291,10 +291,10 @@ hu() {
 }
 
 # Expand terminal screen to twice its height, moving it "Double down"
-dd() {
-    getGeom;
-    xtermcontrol --geometry="${curW}x$(( curH * 2))+${curX}+${curY}"
-}
+#dd() {
+#    getGeom;
+#    xtermcontrol --geometry="${curW}x$(( curH * 2))+${curX}+${curY}"
+#}
 
 # Moves files with a given search string to the given folder
 # Example: sortByString Exception Exception_dir *.log
@@ -318,6 +318,27 @@ sortByString() {
         echo "$file"
         mv "$file" "$dirName/$file"
     done
+}
+
+# hsort -> header sort
+# Sort the input, but do not sort the first line of the input
+# Supports both file and pipe processing
+# Will pass args on to sort, so you can do e.g.
+#   curl https://myurl | hsort -nk2
+function hsort() {
+    # Capture all args
+    args=("$@")
+
+    # Default: input from stdin
+    input="/dev/stdin"
+
+    # If last argument is a file and stdin is not a pipe
+    if [[ "${#args[@]}" -gt 0 && -f "${args[-1]}" && -t 0 ]]; then
+        input="${args[-1]}"
+        unset 'args[-1]'  # remove the last arg (the file) from the array
+    fi
+
+    cat "${input}" | tee >(head -n1) >(tail -n+2 | sort "${args[@]}") >/dev/null
 }
 
 # Look In Zip (and jar) files for a file containing the search string
@@ -622,4 +643,24 @@ venv() {
 
 epoch() {
   date -d @"$1"
+}
+
+findquotes() {
+  awk -v sq="'" -v dq='"' '
+    gsub(sq,sq)%2 || gsub(dq,dq)%2 { 
+        print FILENAME":"FNR":"$0
+   }' $@
+}
+
+waitfor() {
+  local wait
+  wait=10
+  if [[ $# -eq 1 ]]; then
+    wait=$1
+  fi
+  false 2> /dev/null
+  while [[ $? -ne 0 ]]; do 
+    sleep "$wait" 
+    $(fc -ln -1)
+  done
 }

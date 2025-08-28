@@ -51,9 +51,6 @@ alias less='less -SINr'
 # Edit hosts file
 alias hosts='vi /etc/hosts'
 
-# Repeat last command until it returns success
-alias waitfor='while [[ $? -ne 0 ]]; do `fc -ln -1`; done'
-
 # Look for files containing the search string recursively in pwd
 alias findstr='find . \( -name .svn -o -name .git \) -prune -o -type f -print0 2> /dev/null | xargs -0 egrep'
 

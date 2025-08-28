@@ -60,10 +60,16 @@ function _ps1_set_prompt {
     local last_status prompt
     last_status=$( _ps1_prompt_status "$1" )
 
+    venv=""
+    if [[ -n "${VIRTUAL_ENV}" ]]; then
+      venv="${COLOR_MAGENTA}(venv) "
+    fi
+
     prompt="${NEW_LINE}${last_status} "
     prompt+="${COLOR_GREEN}${PS1_USER}${COLOR_RED}@${PS1_COLOR_HOST}${PS1_HOST}${COLOR_BRIGHT} ${COLOR_BLACK}${TIME_24}${COLOR_RESET}${COLOR_YELLOW} ${PATH_SHORT} ${NEW_LINE}"
     prompt+="$(_ps1_prompt_git)"
-    prompt+="${COLOR_YELLOW}${HISTORY_NUMBER} \$${COLOR_RESET} "
+    prompt+="${venv}${COLOR_YELLOW}${HISTORY_NUMBER} \$${COLOR_RESET} "
+    #prompt+=$'\n\n\n\n\n\e[5A'
 
     export PS1="${prompt}"
 }
