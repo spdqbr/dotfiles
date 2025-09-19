@@ -664,3 +664,26 @@ waitfor() {
     $(fc -ln -1)
   done
 }
+
+function cursor() {
+  if (( $# != 2 )); then
+    echo "Change the appearance of the cursor in the terminal"
+    echo "Usage:"
+    echo "  cursor (block|under|bar) (blink|solid)"
+    return
+  fi
+
+  local ctype=1
+  case "$1" in
+    block) ctype=1 ;;
+    under) ctype=3 ;;
+    bar)   ctype=5 ;;
+  esac
+
+  local cbehavior=0
+  if [[ "${2}" == "solid" ]]; then
+    cbehavior=1
+  fi
+
+  echo -ne "\e[$((ctype + cbehavior)) q"
+}

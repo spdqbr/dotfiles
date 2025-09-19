@@ -65,3 +65,11 @@ noremap <silent> <expr> k (v:count == 0 ? 'gk' : 'k')
 
 " use F3 to toggle between paste mode (no-autoindent) and regular mode
 set pastetoggle=<F3>
+
+if &term =~ 'xterm'
+  let &t_SI = "\e[6 q"  " Insert mode: bar cursor
+  let &t_EI = "\e[2 q"  " Normal mode: block cursor
+
+  " Reset cursor to a solid block when leaving Vim
+  autocmd VimLeave * :silent !echo -ne "\e[5 q"
+endif
